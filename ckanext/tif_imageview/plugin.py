@@ -28,12 +28,22 @@ def convert():
     else:
         filepath = rsc["url"]
 
-    file = open(filepath, "rb").read()
-    img = Image.open(io.BytesIO(file))    
-    output = io.BytesIO()
-    img.convert('RGB').save(output, 'JPEG')    
-    output.seek(0)        
-    return base64.b64encode(output.getvalue()).decode()
+    try:
+        if filepath.startswith('http'):
+            response = requests.get(filepath)
+            response.raise_for_status()
+            file = response.content
+        else:
+            with open(filepath, "rb") as f:
+                file = f.read()
+        
+        img = Image.open(io.BytesIO(file))    
+        output = io.BytesIO()
+        img.convert('RGB').save(output, 'JPEG')    
+        output.seek(0)        
+        return base64.b64encode(output.getvalue()).decode()
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 class TifImageviewPlugin(plugins.SingletonPlugin):
