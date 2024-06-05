@@ -22,19 +22,26 @@ def convert():
 
     def is_valid_domain(url):
         return url.startswith('https://data.dev-wins.com') or url.startswith('https://ihp-wins.unesco.org/')
-
+    print(rsc)
+    print(rsc["url"])
     if is_valid_domain(rsc["url"]):
+        print('valid domain')
         upload = uploader.get_resource_uploader(rsc)
         filepath = upload.get_url_from_filename(resource_id, rsc['url'])
     else:
+        print("not valid domain")
         filepath = rsc["url"]
 
     try:
         if filepath.startswith('http'):
+            print("start with http")
+            print(filepath)
             response = requests.get(filepath)
+            print(response)
             response.raise_for_status()
             file = response.content
         else:
+            print("else")
             with open(filepath, "rb") as f:
                 file = f.read()
         
