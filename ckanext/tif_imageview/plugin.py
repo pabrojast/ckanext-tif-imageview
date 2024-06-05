@@ -17,7 +17,17 @@ def convert():
     resource_id = request.form.get('resource_id')    
     rsc = toolkit.get_action('resource_show')({}, {'id': resource_id})
     upload = uploader.get_resource_uploader(rsc)
-    filepath = upload.get_path(rsc['id'])
+    #filepath = upload.get_path(rsc['id'])
+
+    def is_valid_domain(url):
+        return url.startswith('https://data.dev-wins.com') or url.startswith('https://ihp-wins.unesco.org/')
+
+    if is_valid_domain(rsc["url"]):
+        upload = uploader.get_resource_uploader(rsc)
+        filepath = upload.get_url_from_filename(resource_id, rsc['url'])
+    else:
+        filepath = rsc["url"]
+
     file = open(filepath, "rb").read()
     img = Image.open(io.BytesIO(file))    
     output = io.BytesIO()
