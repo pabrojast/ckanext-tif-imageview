@@ -2,12 +2,13 @@ from os import read
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 from six import text_type
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 import ckan.lib.helpers as h
 from PIL import Image
 import io
 import ckan.lib.uploader as uploader
 import base64
+import requests
 
 ignore_empty = plugins.toolkit.get_validator('ignore_empty')
 
