@@ -4,7 +4,8 @@ import ckan.plugins.toolkit as toolkit
 from six import text_type
 from flask import Blueprint, request, jsonify
 import ckan.lib.helpers as h
-from PIL import Image
+import rasterio
+from rasterio.io import MemoryFile
 import io
 import ckan.lib.uploader as uploader
 import base64
@@ -18,7 +19,6 @@ def convert():
     resource_id = request.form.get('resource_id')    
     rsc = toolkit.get_action('resource_show')({}, {'id': resource_id})
     upload = uploader.get_resource_uploader(rsc)
-    #filepath = upload.get_path(rsc['id'])
 
     def is_valid_domain(url):
         return url.startswith('https://data.dev-wins.com') or url.startswith('https://ihp-wins.unesco.org/')
@@ -45,11 +45,13 @@ def convert():
             with open(filepath, "rb") as f:
                 file = f.read()
         
-        img = Image.open(io.BytesIO(file))    
-        output = io.BytesIO()
-        img.convert('RGB').save(output, 'JPEG')    
-        output.seek(0)        
-        return base64.b64encode(output.getvalue()).decode()
+        with MemoryFile(file) as memfile:
+            with memfile.open() as dataset:
+                output = io.BytesIO()
+                for band in dataset.read():
+                    output.write(band)
+                output.seek(0)
+                return base64.b64encode(output.getvalue()).decode()
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
